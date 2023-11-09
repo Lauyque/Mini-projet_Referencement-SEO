@@ -1,0 +1,30 @@
+Portfolio BTS SIO - LE DOHER Loïc
+
+1. Présentation
+    - Nom: LE DOHER Loïc
+    - Classe: BTS SIO
+    - Année: 2021-2023
+
+2. Projets réalisés
+    a. Gestionnaire de tâches
+        - Description: Développement d'une application de gestion de tâches utilisant Python et Flask.
+        - Compétences acquises: Développement web, bases de données.
+
+    b. Réseau d'entreprise
+        - Description: Mise en place et administration d'un réseau d'entreprise pour un client fictif.
+        - Compétences acquises: Administration système, sécurité réseau.
+
+3. Entreprise
+    a. Alternance chez le Ministère des Armées
+        - Période: 2021-2023
+        - Tâches: Support utilisateur, maintenance des systèmes.
+
+4. Compétences
+    - Langages de programmation: Python, Java, C#
+    - Administration système: Windows Server, Linux
+    - Base de données: MySQL, MongoDB
+
+5. Formation
+    - BTS SIO, ESIEE-IT
+
+
