@@ -35,7 +35,6 @@ def  extraire_valeurs_balises(Liste_de_mots_SEO,nom_balise,nom_attribut):
     # Compter le nombre de balises sans attribut alt
     balises_sans_alt = [balise for balise in balises if balise.get(nom_attribut) is None]
     nombre_balises_sans_alt = len(balises_sans_alt)
-
     return valeurs,nombre_balises_sans_alt 
 
 
@@ -137,9 +136,8 @@ for i in range(len(resultat)):
 print()
 
 # Récupérer tous les href des balises a
-valeurs_href = extraire_valeurs_balises((code_html), 'a', 'href')
+valeurs_href,nombre_balises_sans_href = extraire_valeurs_balises(code_html, 'a', 'href')
 #print("Valeurs des attributs href des balises a :", valeurs_href,"\n")
-
 # Séparation des liens entrants et sortants
 nombre = href(valeurs_href,0,0)
 print("Nombre de liens entrant(s) :",nombre[1],"\nNombre de liens sortant(s) :",nombre[0])
