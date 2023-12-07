@@ -13,13 +13,12 @@ class Analyse:
     """Class avec toutes les fonctionnalités pour extraire et analyser le code d'une page HTML
     """
 
-    def __init__(self, url, occurrences):
+    def __init__(self):
         self.fichier_csv = "Liste_de_mots_parasites.csv"
-        self.url = url
-        self.occurrences = occurrences
+        self.occurrences = 5
         
 
-    def extraire_code_html(self):
+    def extraire_code_html(self, url):
         """Envoye une requête pour récupérer le contenu de la page
 
         Args:
@@ -28,7 +27,7 @@ class Analyse:
         Returns:
             _type_: _description_
         """
-        reponse = requests.get(self.url)
+        reponse = requests.get(url)
 
         # Vérifier si la requête a réussi (code 200)
         if reponse.status_code == 200:
@@ -57,7 +56,7 @@ class Analyse:
         texte_sans_balises = soup.get_text(separator=' ')
 
         # Supprimer les caractères spéciaux et la ponctuation
-        texte_sans_balises = Analyser.supprimer_caracteres_speciaux(texte_sans_balises)
+        texte_sans_balises = self.supprimer_caracteres_speciaux(texte_sans_balises)
 
         return texte_sans_balises.split()
 
@@ -163,14 +162,14 @@ class Analyse:
         return nombre_liens_sortant, nombre_liens_entrant
 
 
-    def extraire_nom_domaine(self):
+    def extraire_nom_domaine(self, url):
         """Utiliser urlparse pour extraire les composants de l'URL
 
         Returns:
             _type_: _description_
         """
         # Utiliser urlparse pour extraire les composants de l'URL
-        parsed_url = urlparse(self.url)
+        parsed_url = urlparse(url)
 
         # Extraire le nom de domaine
         nom_domaine = parsed_url.netloc
@@ -184,20 +183,20 @@ class Analyse:
 
 
 
-url = "https://loic-ledoher.fr"
-nombre_occurrences = 5
 
-Analyser = Analyse(url, nombre_occurrences)
-code_html = Analyser.extraire_code_html()
-texte_sans_balises = Analyser.extraire_text(code_html)
-texte_sans_parasites = Analyser.enlever_parasites(texte_sans_balises)
-liste_occurrences = Analyser.occurrence(texte_sans_parasites)
+#nombre_occurrences = 5
 
-for i in range(len(liste_occurrences)):
-    if nombre_occurrences > 0:
-        print(liste_occurrences[i])
-        nombre_occurrences -= 1
-print()
+#Analyser = Analyse(nombre_occurrences)
+#code_html = Analyser.extraire_code_html()
+#texte_sans_balises = Analyser.extraire_text(code_html)
+#texte_sans_parasites = Analyser.enlever_parasites(texte_sans_balises)
+#liste_occurrences = Analyser.occurrence(texte_sans_parasites)
+
+#for i in range(len(liste_occurrences)):
+#    if nombre_occurrences > 0:
+#        print(liste_occurrences[i])
+#        nombre_occurrences -= 1
+#print()
 
 # Debut du script
 #print("Bienvenue sur l'outil pour effectuer un audit SEO simple sur une page web.")
@@ -251,29 +250,42 @@ print()
 # TKinter
 
 # Classe principale qui crée la fenêtre
-class Application(tk.Tk):
+class Application():
+
     def __init__(self):
         """Class Application
         """
-        super().__init__()
+        self.matk = tk.Tk()
+        self.url = tk.StringVar()
+        self.url.set("URL")
+
+        self.mots = tk.StringVar()
+        self.mots.set("Vos mots")
+
+
         # titre de la fenetre
-        self.title("Ma Fenêtre de référencement")
+        self.matk.title("Ma Fenêtre de référencement")
         # taille de la fenetre
-        self.geometry("1000x700")
+        self.matk.geometry("800x500")
         # couleur du fond de la fenetre
-        self.configure(bg="light blue", cursor="pirate", relief="groove")
+        self.matk.configure(bg="light blue", cursor="pirate", relief="groove")
 
 
         # Appel des fonctions
         self.TitrePageWeb()
         self.quitter()
-        self.url()
+        self.zone_url()
+        self.zone_occurrence()
+
+
+        self.matk.mainloop()
+
 
     def TitrePageWeb(self):
         """Fonction pour le titre
         """
         # création de la frame
-        self.frame_titre = tk.Frame(self, width=1000, height=100, bg='light blue')
+        self.frame_titre = tk.Frame(self.matk, width=1000, height=100, bg='light blue')
 
         # création d'un label pour affichage du texte
         self.Label_titre = tk.Label(self.frame_titre, text="Titre Page Web", font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
@@ -287,42 +299,114 @@ class Application(tk.Tk):
         """Fonction pour le bouton quitter
         """
         # création de la frame
-        self.frame_quitter = tk.Frame(self, width=1000, height=50, bg='light blue')
+        self.frame_quitter = tk.Frame(self.matk, width=1000, height=50, bg='light blue')
         # Fontion qui créer un bouton pour quitter l'application
-        self.bouton_quitter = tk.Button(self.frame_quitter, text="Quitter", command=self.destroy)
+        self.bouton_quitter = tk.Button(self.frame_quitter, text="Quitter", command=self.matk.destroy)
 
         # On pack
         self.bouton_quitter.pack()
         self.frame_quitter.pack(side="bottom")
 
-    def url(self):
+
+    def zone_url(self):
         """Fonction pour la zone pour saisir l'url
         """
         # création de la frame
-        self.frame_url = tk.Frame(self, width=1000, height=50, bg='light blue')
+        self.frame_url = tk.Frame(self.matk, width=500, height=100, bg='light blue')
 
         # Création d'une Entry (zone de texte)
-        self.zone_texte = tk.Entry(self.frame_url, width=300)
+        self.zone_texte = tk.Entry(self.frame_url, width=100, textvariable=self.url)
+
+        # Positionnement de la zone de texte sur l'écran
+        self.zone_texte.pack(pady=10)
+
+        # On pack
+        self.frame_url.pack(side="top")
+
+
+    def zone_occurrence(self):
+        """Fonction pour la zone pour saisir l'url
+        """
+        # création de la frame
+        self.frame_reccurrence = tk.Frame(self.matk, width=500, height=100, bg='light blue')
+
+        # Création d'une Entry (zone de texte)
+        self.zone_texte = tk.Entry(self.frame_reccurrence, width=100, textvariable=self.mots)
 
         # Positionnement de la zone de texte sur l'écran
         self.zone_texte.pack(pady=10)
 
         
         # Création d'un bouton pour déclencher une action (optionnel)
-        self.bouton_valider = tk.Button(self.frame_url, text="Valider")#, command=self.afficher_texte)
+        self.bouton_valider = tk.Button(self.frame_reccurrence, text="Valider", command=lambda:self.recuperation())
 
         # On pack
         self.bouton_valider.pack()
+        self.frame_reccurrence.pack(side="top")
+
+    
+    
+    def recuperation(self):
+        valeur = self.url.get()
+        valeur2 = self.mots.get()
+        
+        resul = Resultats(valeur, valeur2)
+
+
+
+
+class Resultats():
+    def __init__(self,url, mots):
+
+        self.matk2 = tk.Toplevel()
+
+        self.url = url
+        self.mots = mots
+
+        # titre de la fenetre
+        self.matk2.title("Ma Fenêtre de référencement - Résultat")
+        # taille de la fenetre
+        self.matk2.geometry("800x500")
+        # couleur du fond de la fenetre
+        self.matk2.configure(bg="light blue", cursor="pirate", relief="groove")
+
+
+        # Appel des fonctions
+        self.TitrePageWeb()
+        self.afficher_resultats()
+
+        self.matk2.mainloop()
+
+
+    def TitrePageWeb(self):
+        """Fonction pour le titre
+        """
+        # création de la frame
+        self.frame_titre = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+
+        # création d'un label pour affichage du texte
+        self.Label_titre = tk.Label(self.frame_titre, text="Titre Page Web", font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
+
+        # positionnement du label sur l'ecran
+        self.Label_titre.pack(side="top", fill="both", expand=True)
+        self.frame_titre.pack(side="top")
+
+    def afficher_resultats(self):
+        analyses = Analyse()
+        print(self.url)
+        self.frame_url = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+        self.Label_url = tk.Label(self.frame_url, text=Analyse.extraire_nom_domaine(analyses, self.url), font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
+
+        self.frame_mots = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+        self.Label_mots = tk.Label(self.frame_mots, text=self.mots, font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
+
+        # positionnement du label sur l'ecran
+        self.Label_url.pack(side="top", fill="both", expand=True)
         self.frame_url.pack(side="top")
 
+        self.Label_mots.pack(side="top", fill="both", expand=True)
+        self.frame_mots.pack(side="top")
 
 
 
-# Fonction principale qui crée une instance de la classe Application et lance la boucle principale de Tkinter
-def main():
-    app = Application()
-    app.mainloop()
-
-# Appel de la fonction principale
-if __name__ == "__main__":
-    main()
+app = Application()
