@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import tkinter as tk
 from tkinter import messagebox
+import tktabl
 
 # -*- coding: UTF-8 -*-
 
@@ -108,7 +109,6 @@ class Analyse:
         """
         # Occurences
         occurrences = Counter(Mots_SEO)
-
         liste_occurrences = [{"Le mot": mot, "occurrence": occurrences[mot]} for mot in occurrences]
 
         # Tri par nombre d'occurrences
@@ -257,10 +257,10 @@ class Application():
         """
         self.matk = tk.Tk()
         self.url = tk.StringVar()
-        self.url.set("URL")
+        self.url.set("https://loic-ledoher.fr")
 
         self.mots = tk.StringVar()
-        self.mots.set("Vos mots")
+        self.mots.set("BTS,SIO")
 
 
         # titre de la fenetre
@@ -288,7 +288,7 @@ class Application():
         self.frame_titre = tk.Frame(self.matk, width=1000, height=100, bg='light blue')
 
         # création d'un label pour affichage du texte
-        self.Label_titre = tk.Label(self.frame_titre, text="Titre Page Web", font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
+        self.Label_titre = tk.Label(self.frame_titre, text="Welcome", font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
 
         # positionnement du label sur l'ecran
         self.Label_titre.pack(side="top", fill="both", expand=True)
@@ -347,6 +347,8 @@ class Application():
     
     
     def recuperation(self):
+        """Fonction pour récupérer les valeurs renseignées dans la première page et les transférer vers la deuxième page
+        """
         valeur = self.url.get()
         valeur2 = self.mots.get()
         
@@ -356,6 +358,8 @@ class Application():
 
 
 class Resultats():
+    """Class qui afficher le résultat de l'analyse
+    """
     def __init__(self,url, mots):
 
         self.matk2 = tk.Toplevel()
@@ -385,27 +389,57 @@ class Resultats():
         self.frame_titre = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
 
         # création d'un label pour affichage du texte
-        self.Label_titre = tk.Label(self.frame_titre, text="Titre Page Web", font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
+        self.Label_titre = tk.Label(self.frame_titre, text="Résultat de l'analyse SEO", font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
 
         # positionnement du label sur l'ecran
         self.Label_titre.pack(side="top", fill="both", expand=True)
         self.frame_titre.pack(side="top")
 
     def afficher_resultats(self):
+        """Fonction qui affiche tous les résultats de l'analyse
+        """
         analyses = Analyse()
         print(self.url)
         self.frame_url = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
         self.Label_url = tk.Label(self.frame_url, text=Analyse.extraire_nom_domaine(analyses, self.url), font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
 
+
+        # Lancement de la Class
+        Analyser = Analyse()
+        # Extraire le code html du site web défini sur la première page
+        code_html = Analyser.extraire_code_html(self.url)
+        # Suppression des balises du code
+        texte_sans_balises = Analyser.extraire_text(code_html)
+        # Suppression des mots parasites (ex : un, une, ...)
+        texte_sans_parasites = Analyser.enlever_parasites(texte_sans_balises)
+        # Création de la listes des occurrences
+        liste_occurrences = Analyser.occurrence(texte_sans_parasites)
+
+        # Split des mots pour l'analyse SEO
+        liste_mots = self.mots.split(',')
+        liste_tableau = []
+        # Comparaisons des occurrences et des mots renseignés
+        for mot_a_comparer in liste_mots:
+            for occurrence in liste_occurrences:
+                # Si l'occurrence correspond aux mots donnés par l'utilisateur alors ...
+                if occurrence['Le mot'].lower() == mot_a_comparer.lower():
+                    # Ajout dans le tableau du mots et de son occurrence
+                    liste_tableau.append(occurrence)
+
+
+        # Création de la frame pour le tableau avec les occurrences
         self.frame_mots = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
-        self.Label_mots = tk.Label(self.frame_mots, text=self.mots, font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
+        # Création du tableau avec les occurrences
+        table = tktabl.Table(self.matk2 , data=liste_tableau)
 
         # positionnement du label sur l'ecran
         self.Label_url.pack(side="top", fill="both", expand=True)
         self.frame_url.pack(side="top")
 
-        self.Label_mots.pack(side="top", fill="both", expand=True)
         self.frame_mots.pack(side="top")
+        # Affichage du tableau
+        table.pack()
+
 
 
 
