@@ -6,9 +6,8 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import tkinter as tk
 import tktabl
-from reportlab.graphics import renderPDF
-from reportlab.graphics.renderPDF import Drawing
 from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 # -*- coding: UTF-8 -*-
 
@@ -555,7 +554,20 @@ class Resultats():
 
 
     def exporter_en_pdf(self):
-        pass
+        # Obtenir la position du widget (tableau) dans la fenêtre principale
+        x, y = self.matk2.winfo_x(), self.matk2.winfo_y()
+
+        # Créer un canvas PDF pour sauvegarder les informations de la table
+        c = canvas.Canvas("export.pdf", pagesize=letter)
+
+        # Convertir les informations du tableau en format texte et les sauvegarder dans le canvas PDF
+        table_data = "\n".join(["\t".join([str(cell.cget("text")) for cell in row]) for row in self.table.rows])
+        c.drawString(50, 750, table_data)
+
+        # Sauvegarder le PDF et fermer le canvas
+        c.save()
+        c.showPage()
+        c.save()
 
 
             
