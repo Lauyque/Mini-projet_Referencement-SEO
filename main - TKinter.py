@@ -5,8 +5,10 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import tkinter as tk
-from tkinter import messagebox
 import tktabl
+from reportlab.graphics import renderPDF
+from reportlab.graphics.renderPDF import Drawing
+from reportlab.lib.pagesizes import letter
 
 # -*- coding: UTF-8 -*-
 
@@ -385,6 +387,7 @@ class Resultats():
         # Appel des fonctions
         self.TitrePageWeb()
         self.afficher_resultats()
+        self.exporter()
         self.quitter()
 
         self.matk2.mainloop()
@@ -471,7 +474,6 @@ class Resultats():
             for j in range (3):
                 if liste_tableau[i] == liste_occurrences[j]:
                     trois_premier = "Au moin un de vos mots sélectionnés figure parmis les 3 premiers."
-        print(trois_premier)
 
         # Si aucunes correspondances alors un message s'affiche pour informer l'utilisateur
         if len(liste_tableau) == 0 and self.mots != "":
@@ -500,6 +502,11 @@ class Resultats():
 
 
     def afficher_liens(self, nombre_liens):
+        """Fonction qui affiche les liens entrant(s) et sortant(s)
+
+        Args:
+            nombre_liens (list): liste avec les nombres de liens
+        """
         # Création de la frame
         self.frame_liens = tk.Frame(self.matk2, width=100, height=50, bg='light blue')
 
@@ -512,8 +519,12 @@ class Resultats():
 
 
     def afficher_alt(self, nombre_balise_alt, nombre_balise_sans_alt):
-        print(nombre_balise_alt)
-        print(nombre_balise_sans_alt)
+        """Fonction qui permet d'afficher le pourcentage de balise <im> avec des alt par rapport au balise sans alt
+
+        Args:
+            nombre_balise_alt (int): Nombre de balise <img> avec des alt
+            nombre_balise_sans_alt (int): Nombre de balise <img> sans alt
+        """
         if nombre_balise_sans_alt != 0:
             Pourcentage = (nombre_balise_sans_alt / nombre_balise_alt) * 100
         else:
@@ -528,6 +539,25 @@ class Resultats():
         # Pack
         self.label_alt.pack(side="top", expand=True, pady=10)
         self.frame_alt.pack(side="top")
+
+
+    def exporter(self):
+        """Fonction qui créer le bouton pour exporter la page
+        """
+        # Création de la frame
+        self.frame_exporter = tk.Frame(self.matk2, width=1000, height=50, bg='light blue')
+        # Fontion qui créer un bouton pour quitter l'application
+        self.bouton_exporter = tk.Button(self.frame_exporter, text="Exporter", command=lambda:self.exporter_en_pdf())
+
+        # On pack
+        self.bouton_exporter.pack()
+        self.frame_exporter.pack(side="top", expand=True)
+
+
+    def exporter_en_pdf(self):
+        pass
+
+
             
     def quitter(self):
         """Fonction pour le bouton quitter
