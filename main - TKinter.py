@@ -378,6 +378,7 @@ class Resultats():
         # Appel des fonctions
         self.TitrePageWeb()
         self.afficher_resultats()
+        self.quitter()
 
         self.matk2.mainloop()
 
@@ -403,6 +404,10 @@ class Resultats():
         self.frame_url = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
         self.Label_url = tk.Label(self.frame_url, text=Analyse.extraire_nom_domaine(analyses, self.url), font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
 
+        # positionnement du label sur l'ecran
+        self.Label_url.pack(side="top", fill="both", expand=True)
+        self.frame_url.pack(side="top")
+
 
         # Lancement de la Class
         Analyser = Analyse()
@@ -425,20 +430,38 @@ class Resultats():
                 if occurrence['Le mot'].lower() == mot_a_comparer.lower():
                     # Ajout dans le tableau du mots et de son occurrence
                     liste_tableau.append(occurrence)
+        # Si aucunes correspondances alors un message s'affiche pour informer l'utilisateur
+        if len(liste_tableau) == 0:
+            self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+            self.label_occurrences = tk.Label(self.frame_occurrences, text="Aucun(s) résultat(s) pour votre recherche", font=("Helvetica", 20), fg="black", bg="light blue")
+            self.label_occurrences.pack(side="bottom", fill="both", expand=True)
+            self.frame_occurrences.pack(side="top")
+        else:
+            table = tktabl.Table(self.matk2 , data=liste_tableau)
+            table.pack()
+        
 
 
         # Création de la frame pour le tableau avec les occurrences
-        self.frame_mots = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+        #self.frame_mots = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
         # Création du tableau avec les occurrences
-        table = tktabl.Table(self.matk2 , data=liste_tableau)
+        #table = tktabl.Table(self.matk2 , data=liste_tableau)
 
-        # positionnement du label sur l'ecran
-        self.Label_url.pack(side="top", fill="both", expand=True)
-        self.frame_url.pack(side="top")
-
-        self.frame_mots.pack(side="top")
+        #self.frame_mots.pack(side="top")
         # Affichage du tableau
-        table.pack()
+        #table.pack()
+            
+    def quitter(self):
+        """Fonction pour le bouton quitter
+        """
+        # création de la frame
+        self.frame_quitter = tk.Frame(self.matk2, width=1000, height=50, bg='light blue')
+        # Fontion qui créer un bouton pour quitter l'application
+        self.bouton_quitter = tk.Button(self.frame_quitter, text="Quitter", command=self.matk2.destroy)
+
+        # On pack
+        self.bouton_quitter.pack()
+        self.frame_quitter.pack(side="bottom")
 
 
 
