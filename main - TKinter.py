@@ -427,8 +427,22 @@ class Resultats():
         # Création de la listes des occurrences
         liste_occurrences = Analyser.occurrence(texte_sans_parasites)
 
+        # Récupérer tous les href des balises a
+        valeurs_href,nombre_balises_sans_href = Analyser.extraire_valeurs_balises(code_html, 'a', 'href')
+        # Séparation des liens entrants et sortants
+        nombre = Analyser.href(valeurs_href,0,0)
+
+        # Récupérer les valeurs des attributs alt des balises img
+        valeurs_alt,nombre_balises_sans_alt = Analyser.extraire_valeurs_balises(code_html, 'img', 'alt')
+        #print("Valeurs des attributs alt des balises img :", valeurs_alt,"\n")
+        #print("Nombre de balises img sans attribut alt :", nombre_balises_sans_alt,"\n")
+
         # Appel de la fonction pour afficher les occurreces demandées
         self.afficher_occurrences(liste_occurrences)
+        # Appel de la fonction pour afficher les liens entrants et sortants
+        self.afficher_liens(nombre)
+        # Appel de la fonction pour afficher le pourcentage de balise <img> avec alt
+        self.afficher_alt(len(valeurs_alt), nombre_balises_sans_alt)
 
             
 
@@ -472,6 +486,36 @@ class Resultats():
         else:
             table = tktabl.Table(self.matk2 , data=liste_tableau)
             table.pack()
+
+    def afficher_liens(self, nombre_liens):
+        # Création de la frame
+        self.frame_liens = tk.Frame(self.matk2, width=100, height=50, bg='light blue')
+
+        # Affichage du nombre des liens
+        self.label_liens = tk.Label(self.frame_liens, text=f"Nombre de liens entrant(s) : {nombre_liens[1]}\nNombre de liens sortant(s) : {nombre_liens[0]}\n")
+
+        # Pack
+        self.label_liens.pack(side="top", expand=True, pady=10)
+        self.frame_liens.pack(side="top")
+
+
+    def afficher_alt(self, nombre_balise_alt, nombre_balise_sans_alt):
+        print(nombre_balise_alt)
+        print(nombre_balise_sans_alt)
+        if nombre_balise_sans_alt != 0:
+            Pourcentage = (nombre_balise_sans_alt / nombre_balise_alt) * 100
+        else:
+            Pourcentage = 100
+
+        # Création de la frame
+        self.frame_alt = tk.Frame(self.matk2, width=100, height=50, bg='light blue')
+
+        # Afficher le pourcentage de balise <img> avec alt
+        self.label_alt = tk.Label(self.frame_alt, text=f"Pourcentage de balise <img> avec des alt : {Pourcentage}%")
+                                  
+        # Pack
+        self.label_alt.pack(side="top", expand=True, pady=10)
+        self.frame_alt.pack(side="top")
             
     def quitter(self):
         """Fonction pour le bouton quitter
