@@ -260,7 +260,7 @@ class Application():
         self.url.set("https://loic-ledoher.fr")
 
         self.mots = tk.StringVar()
-        self.mots.set("BTS,SIO")
+        self.mots.set("Vos mots")
 
 
         # titre de la fenetre
@@ -316,9 +316,11 @@ class Application():
 
         # Création d'une Entry (zone de texte)
         self.zone_texte = tk.Entry(self.frame_url, width=100, textvariable=self.url)
+        self.instruc = tk.Label(self.frame_url, text="Renseignez l'url du site web que vous souhaitez analyser", font=("Helvetica", 11), fg="black", bg="light blue")
 
         # Positionnement de la zone de texte sur l'écran
         self.zone_texte.pack(pady=10)
+        self.instruc.pack()
 
         # On pack
         self.frame_url.pack(side="top")
@@ -332,16 +334,17 @@ class Application():
 
         # Création d'une Entry (zone de texte)
         self.zone_texte = tk.Entry(self.frame_reccurrence, width=100, textvariable=self.mots)
+        self.instruc = tk.Label(self.frame_reccurrence, text="Renseignez les mots que vous voulez voir (séparé(s) d'une virgule). Vous pouvez laisser vide pour voir tous les mots", font=("Helvetica", 11), fg="black", bg="light blue")
 
         # Positionnement de la zone de texte sur l'écran
         self.zone_texte.pack(pady=10)
-
+        self.instruc.pack()
         
         # Création d'un bouton pour déclencher une action (optionnel)
         self.bouton_valider = tk.Button(self.frame_reccurrence, text="Valider", command=lambda:self.recuperation())
 
         # On pack
-        self.bouton_valider.pack()
+        self.bouton_valider.pack(pady=10)
         self.frame_reccurrence.pack(side="top")
 
     
@@ -448,8 +451,8 @@ class Resultats():
                 if occurrence['Le mot'].lower() == mot_a_comparer.lower():
                     # Ajout dans le tableau du mots et de son occurrence
                     liste_tableau.append(occurrence)
+
         # Si aucunes correspondances alors un message s'affiche pour informer l'utilisateur
-        print(liste_tableau)
         if len(liste_tableau) == 0 and self.mots != "":
             self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
             self.label_occurrences = tk.Label(self.frame_occurrences, text=f"Aucun(s) résultat(s) pour votre recherche : {self.mots}", font=("Helvetica", 20), fg="black", bg="light blue")
@@ -458,12 +461,13 @@ class Resultats():
         elif len(liste_tableau) == 0 and self.mots == "":
             self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
             self.label_occurrences = tk.Label(self.frame_occurrences, text=f"Recherche de tous les mots de votre site web", font=("Helvetica", 20), fg="black", bg="light blue")
-
+            self.label_occurrences.pack(side="bottom", fill="both", expand=True)
+            self.frame_occurrences.pack(side="top")
 
             # Création d'un cadre pour le tableau
             cadre_tableau = tk.Frame(self.matk2)
             table = tktabl.Table(cadre_tableau , data=liste_occurrences)
-            cadre_tableau.pack(expand=True, fill="both")
+            cadre_tableau.pack(expand=True)
             table.pack()
         else:
             table = tktabl.Table(self.matk2 , data=liste_tableau)
