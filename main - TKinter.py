@@ -371,6 +371,10 @@ class Resultats():
         self.matk2.title("Ma Fenêtre de référencement - Résultat")
         # taille de la fenetre
         self.matk2.geometry("800x500")
+
+        # Ajustement de la taille de la page
+        self.matk2.pack_propagate(False)
+
         # couleur du fond de la fenetre
         self.matk2.configure(bg="light blue", cursor="pirate", relief="groove")
 
@@ -420,36 +424,50 @@ class Resultats():
         # Création de la listes des occurrences
         liste_occurrences = Analyser.occurrence(texte_sans_parasites)
 
-        # Split des mots pour l'analyse SEO
-        liste_mots = self.mots.split(',')
+        # Appel de la fonction pour afficher les occurreces demandées
+        self.afficher_occurrences(liste_occurrences)
+
+            
+
+    def afficher_occurrences(self, liste_occurrences):
+        """Fonction qui permet l'affichage des occurrences demandées par l'utilisateur
+
+        Args:
+            liste_occurrences (list): liste des mots avec leur occurrences, trouvés dans le site web
+        """
+        # Split des mots pour l'analyse SEO via les virgules
+        # Suppression des espaces pour la bonne compréhension des mots
+        liste_mots = [mot.strip() for mot in self.mots.split(',')]
         liste_tableau = []
+
         # Comparaisons des occurrences et des mots renseignés
         for mot_a_comparer in liste_mots:
             for occurrence in liste_occurrences:
+
                 # Si l'occurrence correspond aux mots donnés par l'utilisateur alors ...
                 if occurrence['Le mot'].lower() == mot_a_comparer.lower():
                     # Ajout dans le tableau du mots et de son occurrence
                     liste_tableau.append(occurrence)
         # Si aucunes correspondances alors un message s'affiche pour informer l'utilisateur
-        if len(liste_tableau) == 0:
+        print(liste_tableau)
+        if len(liste_tableau) == 0 and self.mots != "":
             self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
-            self.label_occurrences = tk.Label(self.frame_occurrences, text="Aucun(s) résultat(s) pour votre recherche", font=("Helvetica", 20), fg="black", bg="light blue")
+            self.label_occurrences = tk.Label(self.frame_occurrences, text=f"Aucun(s) résultat(s) pour votre recherche : {self.mots}", font=("Helvetica", 20), fg="black", bg="light blue")
             self.label_occurrences.pack(side="bottom", fill="both", expand=True)
             self.frame_occurrences.pack(side="top")
+        elif len(liste_tableau) == 0 and self.mots == "":
+            self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+            self.label_occurrences = tk.Label(self.frame_occurrences, text=f"Recherche de tous les mots de votre site web", font=("Helvetica", 20), fg="black", bg="light blue")
+
+
+            # Création d'un cadre pour le tableau
+            cadre_tableau = tk.Frame(self.matk2)
+            table = tktabl.Table(cadre_tableau , data=liste_occurrences)
+            cadre_tableau.pack(expand=True, fill="both")
+            table.pack()
         else:
             table = tktabl.Table(self.matk2 , data=liste_tableau)
             table.pack()
-        
-
-
-        # Création de la frame pour le tableau avec les occurrences
-        #self.frame_mots = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
-        # Création du tableau avec les occurrences
-        #table = tktabl.Table(self.matk2 , data=liste_tableau)
-
-        #self.frame_mots.pack(side="top")
-        # Affichage du tableau
-        #table.pack()
             
     def quitter(self):
         """Fonction pour le bouton quitter
