@@ -466,6 +466,13 @@ class Resultats():
                     # Ajout dans le tableau du mots et de son occurrence
                     liste_tableau.append(occurrence)
 
+        trois_premier = "Vos mots sélectionnés ne figurent pas dans les 3 premiers de votre site web."
+        for i in range (len(liste_tableau)):
+            for j in range (3):
+                if liste_tableau[i] == liste_occurrences[j]:
+                    trois_premier = "Au moin un de vos mots sélectionnés figure parmis les 3 premiers."
+        print(trois_premier)
+
         # Si aucunes correspondances alors un message s'affiche pour informer l'utilisateur
         if len(liste_tableau) == 0 and self.mots != "":
             self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
@@ -484,8 +491,13 @@ class Resultats():
             cadre_tableau.pack(expand=True)
             table.pack()
         else:
+            self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+            self.label_occurrences = tk.Label(self.frame_occurrences, text=f"{trois_premier}", font=("Helvetica", 14), fg="black", bg="light blue")
+            self.label_occurrences.pack(side="bottom", fill="both", expand=True)
+            self.frame_occurrences.pack(side="top")
             table = tktabl.Table(self.matk2 , data=liste_tableau)
             table.pack()
+
 
     def afficher_liens(self, nombre_liens):
         # Création de la frame
