@@ -572,6 +572,9 @@ class Resultats():
     def exporter_en_pdf(self):
         """Fonction qui permet d'exporter toute la page de résultats en pdf
         """
+        # Permet de fermer la page avec les résultats
+        self.matk2.destroy()
+
         file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
         if not file_path:
             return
@@ -590,15 +593,16 @@ class Resultats():
         # Mots clés utilisateur
         story.append(Spacer(1, 12))
         story.append(Paragraph("Mots clés utilisateur:", styles['Heading2']))
-        for i in range (len(self.liste_tableau)):
-            story.append(Paragraph(f"Le mots : {self.liste_tableau[i][1]}:, l'occurrence : {self.liste_tableau[i][1]}", styles['Normal']))
+        if len(self.liste_tableau) > 0:
+            for i in range (len(self.liste_tableau)):
+                story.append(Paragraph(f"{self.liste_tableau[i]}", styles['Normal']))
         else:
             story.append(Paragraph("N/A", styles['Normal']))
 
         # Top mots clés
+        # Création de la liste des trois premières occurrences du site web
         for i in range (3):
             self.trois_occurrences.append(self.occurrences[i])
-        print(self.trois_occurrences)
 
         story.append(Spacer(1, 12))
         story.append(Paragraph("Top mots clés:", styles['Heading2']))
