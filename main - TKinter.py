@@ -5,9 +5,11 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import tkinter as tk
+from tkinter import filedialog, messagebox
 import tktabl
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import LETTER
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 
 # -*- coding: UTF-8 -*-
 
@@ -143,31 +145,36 @@ class Analyse:
         nombre_balises_sans_alt = len(balises_sans_alt)
         return valeurs,nombre_balises_sans_alt 
     
-    def href(self, valeurs_href, nombre_liens_sortant, nombre_liens_entrant):
+    def href(self, valeurs_href):
         """Fonction qui permet d'analyser les liens entrants et sortants
 
         Args:
-            valeurs_href (_type_): _description_
-            nombre_liens_sortant (_type_): _description_
-            nombre_liens_entrant (_type_): _description_
+            valeurs_href (list): Valeurs des alt
 
         Returns:
-            _type_: _description_
+            Dictionnaire: Retourne un dictionnaire avec les 2 types de liens
         """
-        for valeur in valeurs_href:
-            if isinstance(valeur, str) and "http" in valeur:
-                nombre_liens_sortant += 1
-            else:
-                nombre_liens_entrant += 1
 
-        return nombre_liens_sortant, nombre_liens_entrant
+        # Dictionnaire avec le nombre des 2 types de liens
+        liens = [['Liens entrants',0],['Liens sortants',0]]
+
+        # Boucle pour analyser le contenu des alt et compter les 2 types de liens
+        for valeur in valeurs_href:
+            # Si il y a une chaine de caratère evec un 'http' ou un https' alors le lien est sortant
+            if isinstance(valeur, str) and ("http" in valeur or "https" in valeur):
+                liens[1][1] += 1
+            else:
+                liens[0][1] += 1
+
+        # Renvoie une liste des miens
+        return liens
 
 
     def extraire_nom_domaine(self, url):
         """Utiliser urlparse pour extraire les composants de l'URL
 
         Returns:
-            _type_: _description_
+            str: Nom de domaine
         """
         # Utiliser urlparse pour extraire les composants de l'URL
         parsed_url = urlparse(url)
@@ -371,6 +378,17 @@ class Resultats():
         self.url = url
         self.mots = mots
 
+        # Nombre de liens
+        self.liens = (['Liens entrants',0],['Liens sortants',0])
+        # Nombre de balise <img>
+        self.img = (['Balise(s) avec un alt',0],['Balise(s) sans alt',0])
+        # Occurrences du site web
+        self.occurrences = ()
+        # Occurrences de l'utilisateur
+        self.liste_tableau = []
+        # 3 premères occurrences
+        self.trois_occurrences = []
+
         # titre de la fenetre
         self.matk2.title("Ma Fenêtre de référencement - Résultat")
         # taille de la fenetre
@@ -427,28 +445,27 @@ class Resultats():
         # Suppression des mots parasites (ex : un, une, ...)
         texte_sans_parasites = Analyser.enlever_parasites(texte_sans_balises)
         # Création de la listes des occurrences
-        liste_occurrences = Analyser.occurrence(texte_sans_parasites)
+        self.occurrences = Analyser.occurrence(texte_sans_parasites)
 
         # Récupérer tous les href des balises a
         valeurs_href,nombre_balises_sans_href = Analyser.extraire_valeurs_balises(code_html, 'a', 'href')
         # Séparation des liens entrants et sortants
-        nombre = Analyser.href(valeurs_href,0,0)
+        self.liens = Analyser.href(valeurs_href)
 
         # Récupérer les valeurs des attributs alt des balises img
-        valeurs_alt,nombre_balises_sans_alt = Analyser.extraire_valeurs_balises(code_html, 'img', 'alt')
-        #print("Valeurs des attributs alt des balises img :", valeurs_alt,"\n")
-        #print("Nombre de balises img sans attribut alt :", nombre_balises_sans_alt,"\n")
+        valeurs_alt,self.img[1][1] = Analyser.extraire_valeurs_balises(code_html, 'img', 'alt')
+        self.img[0][1] = len(valeurs_alt)
 
         # Appel de la fonction pour afficher les occurreces demandées
-        self.afficher_occurrences(liste_occurrences)
+        self.afficher_occurrences()
         # Appel de la fonction pour afficher les liens entrants et sortants
-        self.afficher_liens(nombre)
+        self.afficher_liens()
         # Appel de la fonction pour afficher le pourcentage de balise <img> avec alt
-        self.afficher_alt(len(valeurs_alt), nombre_balises_sans_alt)
+        self.afficher_alt()
 
             
 
-    def afficher_occurrences(self, liste_occurrences):
+    def afficher_occurrences(self):
         """Fonction qui permet l'affichage des occurrences demandées par l'utilisateur
 
         Args:
@@ -457,30 +474,29 @@ class Resultats():
         # Split des mots pour l'analyse SEO via les virgules
         # Suppression des espaces pour la bonne compréhension des mots
         liste_mots = [mot.strip() for mot in self.mots.split(',')]
-        liste_tableau = []
 
         # Comparaisons des occurrences et des mots renseignés
         for mot_a_comparer in liste_mots:
-            for occurrence in liste_occurrences:
+            for occurrence in self.occurrences:
 
                 # Si l'occurrence correspond aux mots donnés par l'utilisateur alors ...
                 if occurrence['Le mot'].lower() == mot_a_comparer.lower():
                     # Ajout dans le tableau du mots et de son occurrence
-                    liste_tableau.append(occurrence)
+                    self.liste_tableau.append(occurrence)
 
         trois_premier = "Vos mots sélectionnés ne figurent pas dans les 3 premiers de votre site web."
-        for i in range (len(liste_tableau)):
+        for i in range (len(self.liste_tableau)):
             for j in range (3):
-                if liste_tableau[i] == liste_occurrences[j]:
+                if self.liste_tableau[i] == self.occurrences[j]:
                     trois_premier = "Au moin un de vos mots sélectionnés figure parmis les 3 premiers."
 
         # Si aucunes correspondances alors un message s'affiche pour informer l'utilisateur
-        if len(liste_tableau) == 0 and self.mots != "":
+        if len(self.liste_tableau) == 0 and self.mots != "":
             self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
             self.label_occurrences = tk.Label(self.frame_occurrences, text=f"Aucun(s) résultat(s) pour votre recherche : {self.mots}", font=("Helvetica", 20), fg="black", bg="light blue")
             self.label_occurrences.pack(side="bottom", fill="both", expand=True)
             self.frame_occurrences.pack(side="top")
-        elif len(liste_tableau) == 0 and self.mots == "":
+        elif len(self.liste_tableau) == 0 and self.mots == "":
             self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
             self.label_occurrences = tk.Label(self.frame_occurrences, text=f"Recherche de tous les mots de votre site web", font=("Helvetica", 20), fg="black", bg="light blue")
             self.label_occurrences.pack(side="bottom", fill="both", expand=True)
@@ -488,7 +504,7 @@ class Resultats():
 
             # Création d'un cadre pour le tableau
             cadre_tableau = tk.Frame(self.matk2)
-            table = tktabl.Table(cadre_tableau , data=liste_occurrences)
+            table = tktabl.Table(cadre_tableau , data=self.occurrences)
             cadre_tableau.pack(expand=True)
             table.pack()
         else:
@@ -496,11 +512,11 @@ class Resultats():
             self.label_occurrences = tk.Label(self.frame_occurrences, text=f"{trois_premier}", font=("Helvetica", 14), fg="black", bg="light blue")
             self.label_occurrences.pack(side="bottom", fill="both", expand=True)
             self.frame_occurrences.pack(side="top")
-            table = tktabl.Table(self.matk2 , data=liste_tableau)
+            table = tktabl.Table(self.matk2 , data=self.liste_tableau)
             table.pack()
 
 
-    def afficher_liens(self, nombre_liens):
+    def afficher_liens(self):
         """Fonction qui affiche les liens entrant(s) et sortant(s)
 
         Args:
@@ -510,22 +526,22 @@ class Resultats():
         self.frame_liens = tk.Frame(self.matk2, width=100, height=50, bg='light blue')
 
         # Affichage du nombre des liens
-        self.label_liens = tk.Label(self.frame_liens, text=f"Nombre de liens entrant(s) : {nombre_liens[1]}\nNombre de liens sortant(s) : {nombre_liens[0]}\n")
+        self.label_liens = tk.Label(self.frame_liens, text=f"Nombre de liens entrant(s) : {self.liens[0][1]}\nNombre de liens sortant(s) : {self.liens[1][1]}\n")
 
         # Pack
         self.label_liens.pack(side="top", expand=True, pady=10)
         self.frame_liens.pack(side="top")
 
 
-    def afficher_alt(self, nombre_balise_alt, nombre_balise_sans_alt):
-        """Fonction qui permet d'afficher le pourcentage de balise <im> avec des alt par rapport au balise sans alt
+    def afficher_alt(self):
+        """Fonction qui permet d'afficher le pourcentage de balise <img> avec des alt par rapport au balise sans alt
 
         Args:
             nombre_balise_alt (int): Nombre de balise <img> avec des alt
             nombre_balise_sans_alt (int): Nombre de balise <img> sans alt
         """
-        if nombre_balise_sans_alt != 0:
-            Pourcentage = (nombre_balise_sans_alt / nombre_balise_alt) * 100
+        if self.img[1][1] != 0:
+            Pourcentage = (self.img[0][1] / (self.img[0][1] + self.img[1][1])) * 100
         else:
             Pourcentage = 100
 
@@ -556,20 +572,58 @@ class Resultats():
     def exporter_en_pdf(self):
         """Fonction qui permet d'exporter toute la page de résultats en pdf
         """
-        # Obtenir la position du widget (tableau) dans la fenêtre principale
-        x, y = self.matk2.winfo_x(), self.matk2.winfo_y()
+        file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
+        if not file_path:
+            return
 
-        # Créer un canvas PDF pour sauvegarder les informations de la table
-        c = canvas.Canvas("export.pdf", pagesize=letter)
+        doc = SimpleDocTemplate(file_path, pagesize=LETTER)
+        story = []
+        styles = getSampleStyleSheet()
 
-        # Convertir les informations du tableau en format texte et les sauvegarder dans le canvas PDF
-        table_data = "\n".join(["\t".join([str(cell.cget("text")) for cell in row]) for row in self.table.rows])
-        c.drawString(50, 750, table_data)
+        # Titre
+        story.append(Paragraph("Rapport d'Audit SEO", styles['Title']))
 
-        # Sauvegarder le PDF et fermer le canvas
-        c.save()
-        c.showPage()
-        c.save()
+        # URL analysée
+        story.append(Spacer(1, 12))
+        story.append(Paragraph(f"URL analysée: {self.url}", styles['Normal']))
+
+        # Mots clés utilisateur
+        story.append(Spacer(1, 12))
+        story.append(Paragraph("Mots clés utilisateur:", styles['Heading2']))
+        for i in range (len(self.liste_tableau)):
+            story.append(Paragraph(f"Le mots : {self.liste_tableau[i][1]}:, l'occurrence : {self.liste_tableau[i][1]}", styles['Normal']))
+        else:
+            story.append(Paragraph("N/A", styles['Normal']))
+
+        # Top mots clés
+        for i in range (3):
+            self.trois_occurrences.append(self.occurrences[i])
+        print(self.trois_occurrences)
+
+        story.append(Spacer(1, 12))
+        story.append(Paragraph("Top mots clés:", styles['Heading2']))
+        for i in range (len(self.trois_occurrences)):
+            story.append(Paragraph(f"{self.trois_occurrences[i]}", styles['Normal']))
+
+        # Liens entrants
+        story.append(Spacer(1, 12))
+        story.append(Paragraph("Liens entrants:", styles['Heading2']))
+        story.append(Paragraph(f"{self.liens[0][1]}", styles['Normal']))
+
+        # Liens sortants
+        story.append(Spacer(1, 12))
+        story.append(Paragraph("Liens sortants:", styles['Heading2']))
+        story.append(Paragraph(f"{self.liens[1][1]}", styles['Normal']))
+            
+        # Balises alt manquantes
+        story.append(Paragraph("Nombre de balises alt manquantes:", styles['Heading2']))
+        if self.img[1][1] > 0:
+            story.append(Paragraph(f"{self.img[1][1]}", styles['Normal']))
+        else:
+            story.append(Paragraph("Aucune balise alt manquantes !", styles['Normal']))
+
+        doc.build(story)
+        messagebox.showinfo("Sauvegarde Réussie", "Le rapport a été sauvegardé avec succès en format PDF.")
 
 
             
