@@ -554,6 +554,8 @@ class Resultats():
 
 
     def exporter_en_pdf(self):
+        """Fonction qui permet d'exporter toute la page de résultats en pdf
+        """
         # Obtenir la position du widget (tableau) dans la fenêtre principale
         x, y = self.matk2.winfo_x(), self.matk2.winfo_y()
 
