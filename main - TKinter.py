@@ -588,7 +588,8 @@ class Resultats():
 
         # URL analysée
         story.append(Spacer(1, 12))
-        story.append(Paragraph(f"URL analysée: {self.url}", styles['Normal']))
+        story.append(Paragraph(f"URL analysée: ", styles['Heading1']))
+        story.append(Paragraph(f"{self.url}", styles['Normal']))
 
         # Mots clés utilisateur
         story.append(Spacer(1, 12))
