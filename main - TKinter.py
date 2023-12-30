@@ -9,7 +9,7 @@ from tkinter import filedialog, messagebox
 import tktabl
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.platypus import Paragraph, Spacer, SimpleDocTemplate, Table, TableStyle
 
 # -*- coding: UTF-8 -*-
 
@@ -583,22 +583,53 @@ class Resultats():
         story = []
         styles = getSampleStyleSheet()
 
+        # Définir des styles personnalisés
+        titre_style = styles["Title"]
+        titre_style.fontName = "Helvetica-Bold"
+        titre_style.fontSize = 24
+        titre_style.leading = 36
+        titre_style.alignment = 1
+        titre_style.textColor = "#0052CC"
+
+        titre2_style = styles["Heading2"]
+        titre2_style.fontName = "Helvetica-Bold"
+        titre2_style.fontSize = 18
+        titre2_style.leading = 24
+        titre2_style.alignment = 0
+        titre2_style.textColor = "#0052CC"
+
+        info_style = styles["Normal"]
+        info_style.fontName = "Helvetica"
+        info_style.fontSize = 14
+        info_style.leading = 20
+        info_style.alignment = 0
+
         # Titre
-        story.append(Paragraph("Rapport d'Audit SEO", styles['Title']))
+        story.append(Paragraph("Rapport d'Audit SEO", titre_style))
 
         # URL analysée
         story.append(Spacer(1, 12))
-        story.append(Paragraph(f"URL analysée: ", styles['Heading1']))
-        story.append(Paragraph(f"{self.url}", styles['Normal']))
+        story.append(Paragraph(f"URL analysée: ", titre2_style))
+        story.append(Paragraph(f"{self.url}", info_style))
 
         # Mots clés utilisateur
         story.append(Spacer(1, 12))
-        story.append(Paragraph("Mots clés utilisateur:", styles['Heading2']))
+        story.append(Paragraph("Mots clés utilisateur:", titre2_style))
         if len(self.liste_tableau) > 0:
-            for i in range (len(self.liste_tableau)):
-                story.append(Paragraph(f"{self.liste_tableau[i]}", styles['Normal']))
+            table_data = [[f"{i+1}. {mot}"] for i, mot in enumerate(self.liste_tableau)]
+            table = Table(table_data)
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), "#F2F2F2"),
+                ('TEXTCOLOR', (0, 0), (-1, 0), "#0052CC"),
+                ('FONTNAME', (0, 0), (-1, 0), "Helvetica-Bold"),
+                ('FONTSIZE', (0, 0), (-1, 0), 14),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), "#FFFFFF"),
+                ('GRID', (0, 0), (-1, -1), 1, "#CCCCCC"),
+            ]))
+            story.append(table)
         else:
-            story.append(Paragraph("N/A", styles['Normal']))
+            story.append(Paragraph("N/A", info_style))
 
         # Top mots clés
         # Création de la liste des trois premières occurrences du site web
@@ -606,26 +637,36 @@ class Resultats():
             self.trois_occurrences.append(self.occurrences[i])
 
         story.append(Spacer(1, 12))
-        story.append(Paragraph("Top mots clés:", styles['Heading2']))
-        for i in range (len(self.trois_occurrences)):
-            story.append(Paragraph(f"{self.trois_occurrences[i]}", styles['Normal']))
+        story.append(Paragraph("Top mots clés:", titre2_style))
+        table_data = [[f"{i+1}. {mot}"] for i, mot in enumerate(self.trois_occurrences)]
+        table = Table(table_data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), "#F2F2F2"),
+            ('TEXTCOLOR', (0, 0), (-1, 0), "#0052CC"),
+            ('FONTNAME', (0, 0), (-1, 0), "Helvetica-Bold"),
+            ('FONTSIZE', (0, 0), (-1, 0), 14),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), "#FFFFFF"),
+            ('GRID', (0, 0), (-1, -1), 1, "#CCCCCC"),
+        ]))
+        story.append(table)
 
         # Liens entrants
         story.append(Spacer(1, 12))
-        story.append(Paragraph("Liens entrants:", styles['Heading2']))
-        story.append(Paragraph(f"{self.liens[0][1]}", styles['Normal']))
+        story.append(Paragraph("Liens entrants:", titre2_style))
+        story.append(Paragraph(f"{self.liens[0][1]}", info_style))
 
         # Liens sortants
         story.append(Spacer(1, 12))
-        story.append(Paragraph("Liens sortants:", styles['Heading2']))
-        story.append(Paragraph(f"{self.liens[1][1]}", styles['Normal']))
+        story.append(Paragraph("Liens sortants:", titre2_style))
+        story.append(Paragraph(f"{self.liens[1][1]}", info_style))
             
         # Balises alt manquantes
-        story.append(Paragraph("Nombre de balises alt manquantes:", styles['Heading2']))
+        story.append(Paragraph("Nombre de balises alt manquantes:", titre2_style))
         if self.img[1][1] > 0:
-            story.append(Paragraph(f"{self.img[1][1]}", styles['Normal']))
+            story.append(Paragraph(f"{self.img[1][1]}", info_style))
         else:
-            story.append(Paragraph("Aucune balise alt manquantes !", styles['Normal']))
+            story.append(Paragraph("Aucune balise alt manquantes !", info_style))
 
         doc.build(story)
         messagebox.showinfo("Sauvegarde Réussie", "Le rapport a été sauvegardé avec succès en format PDF.")
