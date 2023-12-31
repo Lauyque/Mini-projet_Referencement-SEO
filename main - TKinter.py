@@ -1,11 +1,12 @@
 from collections import Counter
 import unicodedata
 import csv
+import openpyxl
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import tkinter as tk
-from tkinter import filedialog, messagebox, PhotoImage
+from tkinter import ttk,filedialog, messagebox, PhotoImage
 import tktabl
 
 # Librairie pour la création des PDF
@@ -217,6 +218,12 @@ class Application():
         logo = PhotoImage(file='logo.png')
         self.matk.iconphoto(True, logo)
 
+        # Menu
+        menu_bar = tk.Menu(self.matk)
+        file_menu = tk.Menu(menu_bar, tearoff=0)
+        file_menu.add_command(label="Charger Excel", command=lambda:Parasites())
+        menu_bar.add_cascade(label="Mots Parasites", menu=file_menu)
+        self.matk.config(menu=menu_bar)
 
         # Appel des fonctions
         self.TitrePageWeb()
@@ -341,6 +348,13 @@ class Resultats():
 
         # couleur du fond de la fenetre
         self.matk2.configure(bg="light blue", cursor="pirate", relief="groove")
+
+        # Menu
+        menu_bar = tk.Menu(self.matk2)
+        file_menu = tk.Menu(menu_bar, tearoff=0)
+        file_menu.add_command(label="Charger Excel", command=lambda:Parasites())
+        menu_bar.add_cascade(label="Mots Parasites", menu=file_menu)
+        self.matk2.config(menu=menu_bar)
 
 
         # Ajout d'un Canvas pour rendre la fenêtre scrollable
@@ -695,6 +709,121 @@ class Resultats():
         self.frame_quitter.pack(side="bottom")
 
 
+class Parasites():
+    """Class qui gère la page pour les mots parasites
+    """
+    def __init__(self) -> None:
+        self.matk3 = tk.Toplevel()
+
+        # titre de la fenetre
+        self.matk3.title("Ma Fenêtre de référencement - Parasites")
+        # taille de la fenetre
+        self.matk3.geometry("800x500")
+        # Charger l'image et la définir comme icône de la fenêtre
+        logo = PhotoImage(file='logo.png')
+        self.matk3.iconphoto(True, logo)
+
+        # Ajustement de la taille de la page
+        self.matk3.pack_propagate(False)
+
+        # couleur du fond de la fenetre
+        self.matk3.configure(bg="light blue", cursor="pirate", relief="groove")
+
+
+        self.page()
+        self.charger_excel()
+
+        self.matk3.mainloop()
+
+
+    def charger_excel(self):
+        """Ouvrir le fichier excel avec tous les mots parasites
+        """
+        # Chemin fixe du fichier Excel
+        file_path = "Liste_de_mots_parasites.csv"
+        with open(file_path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile)
+            self.tree.delete(*self.tree.get_children())  # Efface les anciennes données du Treeview
+            for row in reader:
+                self.tree.insert('', tk.END, values=row)
+
+
+    def ajout_mot(self):
+        """Ajouter un mot parasite au fichier excel
+        """
+        new_word = self.word_entry.get()
+        if new_word:
+            self.tree.insert('', tk.END, values=(new_word,))
+            self.word_entry.delete(0, tk.END)
+
+
+    def supprimer_mot(self):
+        """Fonction pour supprimer le mot selectionné
+        """
+        selected_item = self.tree.selection()
+        if selected_item:
+            self.tree.delete(selected_item)
+    
+
+    def sauvegarde(self):
+        """Fonction pour sauvegarder les modifications
+        """
+        # Chemin pour sauvegarder le fichier CSV
+        file_path = "Liste_de_mots_parasites.csv"  
+        with open(file_path, 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            for child in self.tree.get_children():
+                writer.writerow(self.tree.item(child)['values'])
+
+        messagebox.showinfo("Information", "Modifications sauvegardées avec succès.")
+
+    def page(self):
+        """Fonction avec toute la mis en page de la fenetre avec les mots parasites
+        """
+        # Frame pour l'ajout
+        self.ajout = tk.Frame(self.matk3,bg='light blue')
+        # Entrée pour ajouter un nouveau mot
+        self.word_entry = tk.Entry(self.ajout)
+        # Boutons pour ajouter ou supprimer des mots
+        self.add_button = tk.Button(self.ajout, text="Ajouter Mot", command=self.ajout_mot)
+
+        # Pack
+        self.word_entry.pack(side="left")
+        self.add_button.pack(side="right")
+        self.ajout.pack(side="top")
+
+        # bouton pour supprimer le mot séléctionné
+        remove_button = tk.Button(self.matk3, text="Supprimer Mot Sélectionné", command=self.supprimer_mot)
+        remove_button.pack()
+
+        # Treeview = colonne pour afficher les mots parasites
+        self.tree = ttk.Treeview(self.matk3, columns=("Word",), show="headings")
+        self.tree.heading("Word", text="Mot")
+        self.tree.pack(expand=True, fill='both')
+
+
+        # Frame pour charger et sauvegarder le fichier CSV
+        self.fin = tk.Frame (self.matk3, bg='light blue')
+
+        # Bouton pour load le fichier
+        load_button = tk.Button(self.fin, text="Charger CSV", command=self.ajout_mot)
+        # Bouton pour sauvegarde le fichier
+        save_button = tk.Button(self.fin, text="Sauvegarder CSV", command=self.sauvegarde)
+
+        # Pack
+        load_button.pack(side="left")
+        save_button.pack(side="right")
+        self.fin.pack()
+
+
+        # création de la frame
+        self.frame_quitter = tk.Frame(self.matk3, width=1000, height=50, bg='light blue')
+        # Fontion qui créer un bouton pour quitter l'application
+        self.bouton_quitter = tk.Button(self.frame_quitter, text="Quitter", command=self.matk3.destroy)
+
+        # On pack
+        self.bouton_quitter.pack()
+        self.frame_quitter.pack(side="bottom")
 
 
 app = Application()
