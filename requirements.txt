@@ -1,0 +1,11 @@
+collections
+unicodedata
+csv
+openpyxl
+requests
+beautifulsoup4
+urllib3
+tkinter
+ttkthemes
+tktabl
+reportlab
