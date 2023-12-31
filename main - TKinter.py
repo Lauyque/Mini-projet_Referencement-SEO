@@ -541,6 +541,12 @@ class Resultats():
 
 
     def header_footer(self, canvas, doc):
+        """En-tête et pied de page de mon fichier PDF
+
+        Args:
+            canvas (_type_): _description_
+            doc (_type_): _description_
+        """
         canvas.saveState()
         # Ajout du logo dans l'en-tête
         logo_path = "logo.png"
