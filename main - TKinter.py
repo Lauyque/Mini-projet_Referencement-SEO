@@ -729,6 +729,9 @@ class Parasites():
         # couleur du fond de la fenetre
         self.matk3.configure(bg="light blue", cursor="pirate", relief="groove")
 
+        # lien vers le fichier Excel des mots parasites
+        self.fichier_excel = "Liste_de_mots_parasites.csv"
+
 
         self.page()
         self.charger_excel()
@@ -739,14 +742,14 @@ class Parasites():
     def charger_excel(self):
         """Ouvrir le fichier excel avec tous les mots parasites
         """
-        # Chemin fixe du fichier Excel
-        fichier_excel = "Liste_de_mots_parasites.csv"
-        with open(fichier_excel, newline='', encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile)
-            # Efface les anciennes données du Treeview
-            self.tree.delete(*self.tree.get_children())
-            for row in reader:
-                self.tree.insert('', tk.END, values=row)
+        try:
+            with open(self.fichier_excel, newline='', encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile)
+                self.tree.delete(*self.tree.get_children())
+                for row in reader:
+                    self.tree.insert('', tk.END, values=row)
+        except Exception as e:
+            print("Erreur lors du chargement du fichier:", e)
 
 
     def ajout_mot(self):
@@ -769,9 +772,7 @@ class Parasites():
     def sauvegarde(self):
         """Fonction pour sauvegarder les modifications
         """
-        # Chemin pour sauvegarder le fichier CSV
-        fichier_excel = "Liste_de_mots_parasites.csv"  
-        with open(fichier_excel, 'w', newline='', encoding='utf-8') as csvfile:
+        with open(self.fichier_excel, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             for child in self.tree.get_children():
                 writer.writerow(self.tree.item(child)['values'])
@@ -808,9 +809,9 @@ class Parasites():
         self.fin = tk.Frame (self.matk3, bg='light blue')
 
         # Bouton pour load le fichier
-        charger_button = tk.Button(self.fin, text="Charger CSV", command=self.ajout_mot)
+        charger_button = tk.Button(self.fin, text="Re-charger le fichier Excel", command=self.charger_excel)
         # Bouton pour sauvegarde le fichier
-        sauvegarder_button = tk.Button(self.fin, text="Sauvegarder CSV", command=self.sauvegarde)
+        sauvegarder_button = tk.Button(self.fin, text="Sauvegarder les modifications", command=self.sauvegarde)
 
         # Pack
         charger_button.pack(side="left")
