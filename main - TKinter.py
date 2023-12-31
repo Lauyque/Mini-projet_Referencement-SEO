@@ -7,9 +7,13 @@ from urllib.parse import urlparse
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import tktabl
+
+# Librairie pour la création des PDF
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import Paragraph, Spacer, SimpleDocTemplate, Table, TableStyle
+from reportlab.platypus import Paragraph, Spacer, SimpleDocTemplate, Table, TableStyle, Image, PageBreak
+from reportlab.lib import colors
+from reportlab.lib.units import cm
 
 # -*- coding: UTF-8 -*-
 
@@ -516,6 +520,18 @@ class Resultats():
         self.frame_exporter.pack(side="top", expand=True)
 
 
+    def header_footer(self, canvas, doc):
+        canvas.saveState()
+        # Ajout du logo dans l'en-tête
+        logo_path = "logo.png"
+        canvas.drawImage(logo_path, 2.54 * cm, 24.3 * cm, width=2.54 * cm, height=2.54 * cm)
+
+        # Ajout du pied de page
+        canvas.setFont('Helvetica', 9)
+        canvas.drawString(2.54 * cm, 2 * cm, "TKinter SEO - Page %d" % doc.page)
+        canvas.restoreState()
+
+
     def exporter_en_pdf(self):
         """Fonction qui permet d'exporter toute la page de résultats en pdf
         """
@@ -562,8 +578,39 @@ class Resultats():
         # Mots clés utilisateur
         story.append(Spacer(1, 12))
         story.append(Paragraph("Mots clés utilisateur:", titre2_style))
-        if len(self.liste_tableau) > 0:
-            table_data = [[f"{i+1}. {mot}"] for i, mot in enumerate(self.liste_tableau)]
+        # Condition pour savoir dans quelle liste aller chercher les occurrences
+        if len(self.mots) > 0:
+            if len(self.liste_tableau) > 0:
+                # Créer des en-têtes de colonnes
+                table_data = [['Mot', 'Occurrence']]
+
+                # Ajout de chaque occurrence dans une nouvelle ligne du tableau
+                for occurrence in self.occurrences:
+                    row = [occurrence['Le mot'], occurrence['occurrence']]
+                    table_data.append(row)
+                table = Table(table_data)
+
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), "#F2F2F2"),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), "#0052CC"),
+                    ('FONTNAME', (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ('FONTSIZE', (0, 0), (-1, 0), 14),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), "#FFFFFF"),
+                    ('GRID', (0, 0), (-1, -1), 1, "#CCCCCC"),
+                ]))
+                story.append(table)
+            else:
+                story.append(Paragraph("N/A", info_style))
+        elif len(self.occurrences) > 0:
+            # Créer des en-têtes de colonnes
+            table_data = [['Mot', 'Occurrence']]
+
+            # Ajouter chaque occurrence dans une nouvelle ligne du tableau
+            for occurrence in self.occurrences:
+                row = [occurrence['Le mot'], occurrence['occurrence']]
+                table_data.append(row)
+
             table = Table(table_data)
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), "#F2F2F2"),
@@ -578,6 +625,7 @@ class Resultats():
         else:
             story.append(Paragraph("N/A", info_style))
 
+
         # Top mots clés
         # Création de la liste des trois premières occurrences du site web
         for i in range (3):
@@ -585,7 +633,14 @@ class Resultats():
 
         story.append(Spacer(1, 12))
         story.append(Paragraph("Top mots clés:", titre2_style))
-        table_data = [[f"{i+1}. {mot}"] for i, mot in enumerate(self.trois_occurrences)]
+
+        # Créer des en-têtes de colonnes
+        table_data = [['Mot', 'Occurrence']]
+        # Ajouter chaque occurrence dans une nouvelle ligne du tableau
+        for occurrence in self.trois_occurrences:
+            row = [occurrence['Le mot'], occurrence['occurrence']]
+            table_data.append(row)
+
         table = Table(table_data)
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), "#F2F2F2"),
@@ -615,7 +670,8 @@ class Resultats():
         else:
             story.append(Paragraph("Aucune balise alt manquantes !", info_style))
 
-        doc.build(story)
+
+        doc.build(story, onFirstPage=self.header_footer, onLaterPages=self.header_footer)
         messagebox.showinfo("Sauvegarde Réussie", "Le rapport a été sauvegardé avec succès en format PDF.")
 
 
