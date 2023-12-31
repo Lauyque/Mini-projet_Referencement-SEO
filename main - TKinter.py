@@ -740,10 +740,11 @@ class Parasites():
         """Ouvrir le fichier excel avec tous les mots parasites
         """
         # Chemin fixe du fichier Excel
-        file_path = "Liste_de_mots_parasites.csv"
-        with open(file_path, newline='', encoding='utf-8') as csvfile:
+        fichier_excel = "Liste_de_mots_parasites.csv"
+        with open(fichier_excel, newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
-            self.tree.delete(*self.tree.get_children())  # Efface les anciennes données du Treeview
+            # Efface les anciennes données du Treeview
+            self.tree.delete(*self.tree.get_children())
             for row in reader:
                 self.tree.insert('', tk.END, values=row)
 
@@ -751,31 +752,32 @@ class Parasites():
     def ajout_mot(self):
         """Ajouter un mot parasite au fichier excel
         """
-        new_word = self.word_entry.get()
-        if new_word:
-            self.tree.insert('', tk.END, values=(new_word,))
-            self.word_entry.delete(0, tk.END)
+        nouveau_mot = self.add_mot.get()
+        if nouveau_mot:
+            self.tree.insert('', tk.END, values=(nouveau_mot,))
+            self.add_mot.delete(0, tk.END)
 
 
     def supprimer_mot(self):
         """Fonction pour supprimer le mot selectionné
         """
-        selected_item = self.tree.selection()
-        if selected_item:
-            self.tree.delete(selected_item)
+        mot_selectionne = self.tree.selection()
+        if mot_selectionne:
+            self.tree.delete(mot_selectionne)
     
 
     def sauvegarde(self):
         """Fonction pour sauvegarder les modifications
         """
         # Chemin pour sauvegarder le fichier CSV
-        file_path = "Liste_de_mots_parasites.csv"  
-        with open(file_path, 'w', newline='', encoding='utf-8') as csvfile:
+        fichier_excel = "Liste_de_mots_parasites.csv"  
+        with open(fichier_excel, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             for child in self.tree.get_children():
                 writer.writerow(self.tree.item(child)['values'])
 
         messagebox.showinfo("Information", "Modifications sauvegardées avec succès.")
+        self.matk3.destroy
 
     def page(self):
         """Fonction avec toute la mis en page de la fenetre avec les mots parasites
@@ -783,12 +785,12 @@ class Parasites():
         # Frame pour l'ajout
         self.ajout = tk.Frame(self.matk3,bg='light blue')
         # Entrée pour ajouter un nouveau mot
-        self.word_entry = tk.Entry(self.ajout)
+        self.add_mot = tk.Entry(self.ajout)
         # Boutons pour ajouter ou supprimer des mots
         self.add_button = tk.Button(self.ajout, text="Ajouter Mot", command=self.ajout_mot)
 
         # Pack
-        self.word_entry.pack(side="left")
+        self.add_mot.pack(side="left")
         self.add_button.pack(side="right")
         self.ajout.pack(side="top")
 
@@ -796,7 +798,7 @@ class Parasites():
         remove_button = tk.Button(self.matk3, text="Supprimer Mot Sélectionné", command=self.supprimer_mot)
         remove_button.pack()
 
-        # Treeview = colonne pour afficher les mots parasites
+        # Treeview = widget pour afficher les mots parasites
         self.tree = ttk.Treeview(self.matk3, columns=("Word",), show="headings")
         self.tree.heading("Word", text="Mot")
         self.tree.pack(expand=True, fill='both')
@@ -806,13 +808,13 @@ class Parasites():
         self.fin = tk.Frame (self.matk3, bg='light blue')
 
         # Bouton pour load le fichier
-        load_button = tk.Button(self.fin, text="Charger CSV", command=self.ajout_mot)
+        charger_button = tk.Button(self.fin, text="Charger CSV", command=self.ajout_mot)
         # Bouton pour sauvegarde le fichier
-        save_button = tk.Button(self.fin, text="Sauvegarder CSV", command=self.sauvegarde)
+        sauvegarder_button = tk.Button(self.fin, text="Sauvegarder CSV", command=self.sauvegarde)
 
         # Pack
-        load_button.pack(side="left")
-        save_button.pack(side="right")
+        charger_button.pack(side="left")
+        sauvegarder_button.pack(side="right")
         self.fin.pack()
 
 
