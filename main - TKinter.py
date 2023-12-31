@@ -187,75 +187,7 @@ class Analyse:
 
 
 
-
-
-
-
-
-#nombre_occurrences = 5
-
-#Analyser = Analyse(nombre_occurrences)
-#code_html = Analyser.extraire_code_html()
-#texte_sans_balises = Analyser.extraire_text(code_html)
-#texte_sans_parasites = Analyser.enlever_parasites(texte_sans_balises)
-#liste_occurrences = Analyser.occurrence(texte_sans_parasites)
-
-#for i in range(len(liste_occurrences)):
-#    if nombre_occurrences > 0:
-#        print(liste_occurrences[i])
-#        nombre_occurrences -= 1
-#print()
-
-# Debut du script
-#print("Bienvenue sur l'outil pour effectuer un audit SEO simple sur une page web.")
-#url = input("Quel URL voulez-vous analyser :")
-#Liste_de_mots_parasites = input("Quel est le chemin du fichier (.csv) avec les mots parasites :")
-#nombre_occurrences = int(input("Combien d'occurrences voulez-vous analyser :"))
-
-# Obtenir le nom de domaine d'une URL
-#url = "https://loic-ledoher.fr"
-#nom_domaine = extraire_nom_domaine(url)
-#print("\nNom de domaine :", nom_domaine,"\n")
-
-# Récupération du code du site
-#code_html = extraire_code_html(url)
-
-# Chemin du documents avec les mots parasites
-#Liste_de_mots_parasites = "Liste_de_mots_parasites.csv"
-
-# Extraire le text des balises
-#Liste_Mots = extraire_text(code_html)
-
-# Supprimé tous les mots parasites
-#mots_SEO_propre = enlever_parasites(Liste_Mots,Liste_de_mots_parasites)
-
-#Compter les occurrences et mettre en forme le dictionnaire
-#resultat = occurrence (mots_SEO_propre)
-
-# Afficher les mots clés avec les occurrences
-#for i in range(len(resultat)):
-#    if nombre_occurrences > 0:
-#        print(resultat[i])
-#        nombre_occurrences -= 1
-#print()
-
-# Récupérer tous les href des balises a
-#valeurs_href,nombre_balises_sans_href = extraire_valeurs_balises(code_html, 'a', 'href')
-#print("Valeurs des attributs href des balises a :", valeurs_href,"\n")
-# Séparation des liens entrants et sortants
-#nombre = href(valeurs_href,0,0)
-#print("Nombre de liens entrant(s) :",nombre[1],"\nNombre de liens sortant(s) :",nombre[0])
-
-# Récupérer les valeurs des attributs alt des balises img
-#valeurs_alt,nombre_balises_sans_alt = extraire_valeurs_balises(code_html, 'img', 'alt')
-#print("Valeurs des attributs alt des balises img :", valeurs_alt,"\n")
-#print("Nombre de balises img sans attribut alt :", nombre_balises_sans_alt,"\n")
-
-
-
-
-
-# TKinter
+############## TKinter
 
 # Classe principale qui crée la fenêtre
 class Application():
@@ -401,11 +333,26 @@ class Resultats():
         self.matk2.configure(bg="light blue", cursor="pirate", relief="groove")
 
 
+        # Ajout d'un Canvas pour rendre la fenêtre scrollable
+        self.canvas = tk.Canvas(self.matk2, bg='light blue')
+        self.canvas.pack(side="left", fill="both", expand=True)
+        # Ajout d'une barre de défilement verticale
+        scrollbar = tk.Scrollbar(self.matk2, command=self.canvas.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+        # Ajout d'un frame pour contenir tous les éléments
+        self.frame_conteneur = tk.Frame(self.canvas, bg='light blue')
+        self.canvas.create_window((0, 0), window=self.frame_conteneur, anchor="nw")
+
         # Appel des fonctions
         self.TitrePageWeb()
         self.afficher_resultats()
         self.exporter()
         self.quitter()
+
+        # Mettez à jour la taille du Canvas après avoir ajouté tous les éléments
+        self.frame_conteneur.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
         self.matk2.mainloop()
 
@@ -414,21 +361,21 @@ class Resultats():
         """Fonction pour le titre
         """
         # création de la frame
-        self.frame_titre = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+        self.frame_titre = tk.Frame(self.frame_conteneur, width=1000, height=100, bg='light blue')
 
         # création d'un label pour affichage du texte
         self.Label_titre = tk.Label(self.frame_titre, text="Résultat de l'analyse SEO", font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
 
         # positionnement du label sur l'ecran
-        self.Label_titre.pack(side="top", fill="both", expand=True)
-        self.frame_titre.pack(side="top")
+        self.Label_titre.pack(side="top",anchor="center", fill="both", expand=True,padx=90)
+        self.frame_titre.pack(side="top",anchor="center", fill="both", expand=True,padx=90)
 
     def afficher_resultats(self):
         """Fonction qui affiche tous les résultats de l'analyse
         """
         analyses = Analyse()
         print(self.url)
-        self.frame_url = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+        self.frame_url = tk.Frame(self.frame_conteneur, width=1000, height=100, bg='light blue')
         self.Label_url = tk.Label(self.frame_url, text=Analyse.extraire_nom_domaine(analyses, self.url), font=("Helvetica", 25, "bold"), fg="red", bg="light blue")
 
         # positionnement du label sur l'ecran
@@ -492,27 +439,27 @@ class Resultats():
 
         # Si aucunes correspondances alors un message s'affiche pour informer l'utilisateur
         if len(self.liste_tableau) == 0 and self.mots != "":
-            self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+            self.frame_occurrences = tk.Frame(self.frame_conteneur, width=1000, height=100, bg='light blue')
             self.label_occurrences = tk.Label(self.frame_occurrences, text=f"Aucun(s) résultat(s) pour votre recherche : {self.mots}", font=("Helvetica", 20), fg="black", bg="light blue")
             self.label_occurrences.pack(side="bottom", fill="both", expand=True)
             self.frame_occurrences.pack(side="top")
         elif len(self.liste_tableau) == 0 and self.mots == "":
-            self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+            self.frame_occurrences = tk.Frame(self.frame_conteneur, width=1000, height=100, bg='light blue')
             self.label_occurrences = tk.Label(self.frame_occurrences, text=f"Recherche de tous les mots de votre site web", font=("Helvetica", 20), fg="black", bg="light blue")
             self.label_occurrences.pack(side="bottom", fill="both", expand=True)
             self.frame_occurrences.pack(side="top")
 
             # Création d'un cadre pour le tableau
-            cadre_tableau = tk.Frame(self.matk2)
+            cadre_tableau = tk.Frame(self.frame_conteneur)
             table = tktabl.Table(cadre_tableau , data=self.occurrences)
             cadre_tableau.pack(expand=True)
             table.pack()
         else:
-            self.frame_occurrences = tk.Frame(self.matk2, width=1000, height=100, bg='light blue')
+            self.frame_occurrences = tk.Frame(self.frame_conteneur, width=1000, height=100, bg='light blue')
             self.label_occurrences = tk.Label(self.frame_occurrences, text=f"{trois_premier}", font=("Helvetica", 14), fg="black", bg="light blue")
             self.label_occurrences.pack(side="bottom", fill="both", expand=True)
             self.frame_occurrences.pack(side="top")
-            table = tktabl.Table(self.matk2 , data=self.liste_tableau)
+            table = tktabl.Table(self.frame_conteneur , data=self.liste_tableau)
             table.pack()
 
 
@@ -523,7 +470,7 @@ class Resultats():
             nombre_liens (list): liste avec les nombres de liens
         """
         # Création de la frame
-        self.frame_liens = tk.Frame(self.matk2, width=100, height=50, bg='light blue')
+        self.frame_liens = tk.Frame(self.frame_conteneur, width=100, height=50, bg='light blue')
 
         # Affichage du nombre des liens
         self.label_liens = tk.Label(self.frame_liens, text=f"Nombre de liens entrant(s) : {self.liens[0][1]}\nNombre de liens sortant(s) : {self.liens[1][1]}\n")
@@ -546,7 +493,7 @@ class Resultats():
             Pourcentage = 100
 
         # Création de la frame
-        self.frame_alt = tk.Frame(self.matk2, width=100, height=50, bg='light blue')
+        self.frame_alt = tk.Frame(self.frame_conteneur, width=100, height=50, bg='light blue')
 
         # Afficher le pourcentage de balise <img> avec alt
         self.label_alt = tk.Label(self.frame_alt, text=f"Pourcentage de balise <img> avec des alt : {Pourcentage}%")
@@ -560,7 +507,7 @@ class Resultats():
         """Fonction qui créer le bouton pour exporter la page
         """
         # Création de la frame
-        self.frame_exporter = tk.Frame(self.matk2, width=1000, height=50, bg='light blue')
+        self.frame_exporter = tk.Frame(self.frame_conteneur, width=1000, height=50, bg='light blue')
         # Fontion qui créer un bouton pour quitter l'application
         self.bouton_exporter = tk.Button(self.frame_exporter, text="Exporter", command=lambda:self.exporter_en_pdf())
 
@@ -677,7 +624,7 @@ class Resultats():
         """Fonction pour le bouton quitter
         """
         # création de la frame
-        self.frame_quitter = tk.Frame(self.matk2, width=1000, height=50, bg='light blue')
+        self.frame_quitter = tk.Frame(self.frame_conteneur, width=1000, height=50, bg='light blue')
         # Fontion qui créer un bouton pour quitter l'application
         self.bouton_quitter = tk.Button(self.frame_quitter, text="Quitter", command=self.matk2.destroy)
 
