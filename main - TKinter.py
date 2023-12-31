@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, PhotoImage
 import tktabl
 
 # Librairie pour la création des PDF
@@ -213,6 +213,9 @@ class Application():
         self.matk.geometry("800x500")
         # couleur du fond de la fenetre
         self.matk.configure(bg="light blue", cursor="pirate", relief="groove")
+        # Charger l'image et la définir comme icône de la fenêtre
+        logo = PhotoImage(file='logo.png')
+        self.matk.iconphoto(True, logo)
 
 
         # Appel des fonctions
@@ -329,6 +332,9 @@ class Resultats():
         self.matk2.title("Ma Fenêtre de référencement - Résultat")
         # taille de la fenetre
         self.matk2.geometry("800x500")
+        # Charger l'image et la définir comme icône de la fenêtre
+        logo = PhotoImage(file='logo.png')
+        self.matk2.iconphoto(True, logo)
 
         # Ajustement de la taille de la page
         self.matk2.pack_propagate(False)
