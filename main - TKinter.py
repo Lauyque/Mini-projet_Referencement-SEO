@@ -352,8 +352,17 @@ class Resultats():
         # Menu
         menu_bar = tk.Menu(self.matk2)
         file_menu = tk.Menu(menu_bar, tearoff=0)
-        file_menu.add_command(label="Charger Excel", command=lambda:Parasites())
-        menu_bar.add_cascade(label="Mots Parasites", menu=file_menu)
+        # Menu pour les mots parasites
+        parasite_menu = tk.Menu(menu_bar, tearoff=0)
+        parasite_menu.add_command(label="Charger Excel", command=lambda: self.Parasites())
+        menu_bar.add_cascade(label="Mots Parasites", menu=parasite_menu)
+
+        # Menu pour exporter
+        export_menu = tk.Menu(menu_bar, tearoff=0)
+        export_menu.add_command(label="PDF", command=lambda: self.exporter_en_pdf())
+        menu_bar.add_cascade(label="Exporter", menu=export_menu)
+
+        # Configuration de la barre de menu
         self.matk2.config(menu=menu_bar)
 
 
