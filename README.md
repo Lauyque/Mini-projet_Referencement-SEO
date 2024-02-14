@@ -10,4 +10,4 @@ Dans ce projet, nous avions pour objectif d'analyser une URL et de ressortir les
 
 ## Installation
 Un fichier "requirements.txt" est dispo pour installer toutes les librairies.\n
-Ensuite, vous pouvez lancer le main - TKinter.py
+Ensuite, vous pouvez lancer le `main - TKinter.py`
