@@ -9,5 +9,5 @@ Dans ce projet, nous avions pour objectif d'analyser une URL et de ressortir les
 - Partie 2 du projet = main - TKinter.py
 
 ## Installation
-- Un fichier "requirements.txt" est dispo pour installer toutes les librairies.
+- Un fichier `requirements.txt` est dispo pour installer toutes les librairies.
 - Ensuite, vous pouvez lancer le `main - TKinter.py` si vous avez importé tous les fichiers.
